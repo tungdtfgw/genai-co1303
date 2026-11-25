@@ -36,10 +36,26 @@ gender_function = {
     }
 }
 
+holidays_function = {
+    "name": "get_holidays",
+    "description": "Get holidays for a country",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "country": {
+                "type": "string",
+                "description": "The country abbreviations (i.e us for united state) to get holidays"
+            }
+        },
+        "required": ["country"]
+    }
+}
+
+
 # Generation Config
 config = GenerateContentConfig(
-    system_instruction="You are a helpful assistant, you can answer everything. However, when user asks about cats or cat facts, use the get_cat_fact function. When user asks about any question that requires gender prediction for a name, you must use the get_gender function then based on the probability returned to answer. Otherwise, provide a general response from your general knowledge.",
-    tools=[{"function_declarations": [cat_function, gender_function]}]
+    system_instruction="You are a helpful assistant, you can answer everything. However, when user asks about cats or cat facts, use the get_cat_fact function. When user asks about any question that requires gender prediction for a name, you must use the get_gender function then based on the probability returned to answer. When user asks about holidays in a country, use get_holidays function. Otherwise, provide a general response from your general knowledge.",
+    tools=[{"function_declarations": [cat_function, gender_function, holidays_function]}]
 )
 
 # Function to get a random cat fact from a cat facts API
@@ -67,10 +83,25 @@ def get_gender(name):
     except Exception as e:
         return {"error": str(e)}
 
+def get_holidays(country):
+    print(f"[Tool called!!!]: Get holidays from caldays")
+    try:
+        response = requests.get(f"https://caldays.com/api/long-weekends/{country}")
+        data = response.json()
+        return {
+            "code": data["code"],
+            "country": data["country"],
+            "year": data["year"],
+            "longWeekends": data["longWeekends"]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 # Function dictionary to map the function name to the function
 functions = {
     "get_cat_fact": get_cat_fact,
-    "get_gender": get_gender
+    "get_gender": get_gender,
+    "get_holidays": get_holidays
 }
 
 # Helper function to call the function
