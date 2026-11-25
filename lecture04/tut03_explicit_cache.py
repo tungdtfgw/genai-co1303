@@ -48,22 +48,21 @@ def upload_pdf_to_cache(client, pdf_path):
         
         
         
-        # Create explicit cache with Gemini 2.0 Flash 
+        # Create explicit cache with Gemini 2.5 Flash 
         cache = client.caches.create(
-            model='gemini-2.0-flash',
+            model='gemini-2.5-flash',
             config=types.CreateCachedContentConfig(
                 display_name='PDF document cache',
                 system_instruction=(
                     'You are an expert document analyzer. Answer questions '
                     'based only on the content of the provided PDF document. '
                 ),
-                contents=[pdf_file],
-                ttl="3600s",  # Cache for 1 hour
+                contents=[pdf_file]
             )
         )
         
         print(f"Cache created successfully: {cache.name}")
-        print(f"Cache TTL: {cache.ttl}")
+        #print(f"Cache TTL: {cache.ttl}")
         return cache, pdf_file
         
     except Exception as e:
@@ -75,7 +74,7 @@ def ask_question_with_cache(client, cache, question):
     """Ask a question using the cached content"""
     try:
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-2.5-flash',
             contents=question,
             config=types.GenerateContentConfig(
                 cached_content=cache.name
